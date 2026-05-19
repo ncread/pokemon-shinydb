@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Hunts — ShinyDex</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav>
+        <a href="dashboard.html" class="nav-brand">✨ ShinyDex</a>
+        <div class="nav-links">
+            <a href="dashboard.html" class="nav-link active">My Hunts</a>
+            <a href="community.html" class="nav-link">Community</a>
+        </div>
+        <div class="nav-user">
+            <span class="nav-username" id="nav-username"></span>
+            <button class="btn btn-secondary btn-sm" onclick="signOut()">Log Out</button>
+        </div>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">My Hunts</h1>
+            <p class="page-subtitle" id="hunt-count">&nbsp;</p>
+        </div>
+        <button class="btn btn-primary" onclick="openModal()">+ New Hunt</button>
+    </div>
+
+    <!-- HUNTS -->
+    <div id="hunts-container">
+        <div class="loading">Loading your hunts…</div>
+    </div>
+
+    <!-- ── ADD HUNT MODAL ───────────────────────────── -->
+    <div class="modal-overlay" id="add-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <span class="modal-title">Start a New Hunt</span>
+                <button class="modal-close" onclick="closeModal()">×</button>
+            </div>
+
+            <div id="modal-alert"></div>
+
+            <!-- Pokémon search -->
+            <div class="form-group">
+                <label class="form-label">Pokémon</label>
+                <div class="input-row">
+                    <input type="text" class="form-input" id="pokemon-input"
+                           placeholder="e.g. gastly, ralts, beldum"
+                           onkeydown="if(event.key==='Enter') handlePokemonSearch()">
+                    <button class="btn btn-secondary" onclick="handlePokemonSearch()">Find</button>
+                </div>
+                <span class="form-hint">Type the Pokémon name (Gen 1–6) and click Find</span>
+                <div class="pokemon-preview" id="pokemon-preview">
+                    <img id="preview-sprite" src="" alt="">
+                    <span class="pokemon-preview-name" id="preview-name"></span>
+                </div>
+            </div>
+
+            <!-- Game dropdown -->
+            <div class="form-group">
+                <label class="form-label">Game</label>
+                <select class="form-select" id="game-select" onchange="handleGameChange()">
+                    <option value="">Select a game…</option>
+                </select>
+            </div>
+
+            <!-- Method dropdown -->
+            <div class="form-group">
+                <label class="form-label">Method</label>
+                <select class="form-select" id="method-select"
+                        onchange="handleMethodChange()" disabled>
+                    <option value="">Select a method…</option>
+                </select>
+                <div class="odds-display" id="odds-display"></div>
+            </div>
+
+            <button class="btn btn-primary"
+                    style="width:100%; padding:0.72rem; margin-top:0.4rem"
+                    onclick="handleAddHunt()">
+                Start Hunt
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/hunts.js"></script>
+    <script>
+        let currentUser  = null;
+        let currentHunts = [];
+        let pendingPokemon = null; // { id, name } once validated
+
+        // ── INIT ────────────────────────────────────────
+        async function init() {
+            currentUser = await requireAuth();
+            if (!currentUser) return;
+
+            const profile = await getProfile(currentUser.id);
+            document.getElementById('nav-username').textContent =
+                profile?.username || currentUser.email;
+
+            await loadGames();
+            await loadHunts();
+        }
+
+        // ── LOAD & RENDER ────────────────────────────────
+        async function loadHunts() {
+            try {
+                currentHunts = await getMyHunts(currentUser.id);
+                renderHunts();
+            } catch (e) {
+                document.getElementById('hunts-container').innerHTML =
+                    `<div class="loading">Error loading hunts: ${e.message}</div>`;
+            }
+        }
+
+        function renderHunts() {
+            const container = document.getElementById('hunts-container');
+            const active = currentHunts.filter(h => !h.found);
+            const found  = currentHunts.filter(h =>  h.found);
+
+            const total = currentHunts.length;
+            document.getElementById('hunt-count').textContent =
+                total === 0
+                    ? 'No hunts yet'
+                    : `${active.length} active · ${found.length} found`;
+
+            if (total === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">✨</span>
+                        <h3>No hunts yet</h3>
+                        <p>Click "+ New Hunt" to start tracking.</p>
+                    </div>`;
+                return;
+            }
+
+            let html = '';
+
+            if (active.length > 0) {
+                html += `<div class="hunts-grid">
+                    ${active.map(h => renderHuntCard(h, true)).join('')}
+                </div>`;
+            }
+
+            if (found.length > 0) {
+                html += `
+                    <div class="section-header">
+                        <h2>✨ Found Shinies</h2>
+                    </div>
+                    <div class="hunts-grid">
+                        ${found.map(h => renderHuntCard(h, true)).join('')}
+                    </div>`;
+            }
+
+            container.innerHTML = html;
+        }
+
+        // ── ENCOUNTER BUTTONS ────────────────────────────
+        async function handleAddEncounters(huntId, amount) {
+            const hunt = currentHunts.find(h => h.id === huntId);
+            if (!hunt) return;
+
+            hunt.encounter_count += amount;
+            const newCount = hunt.encounter_count;
+            const odds = hunt.methods.shiny_odds_denom;
+
+            // Update DOM immediately (optimistic)
+            const card = document.getElementById(`hunt-card-${huntId}`);
+            if (card) {
+                card.querySelector('.encounter-display').textContent = formatNumber(newCount);
+                const probEl = card.querySelector('.prob-display');
+                probEl.textContent = formatProbability(newCount, odds);
+                const over = newCount > odds;
+                probEl.classList.toggle('overdue', over);
+                card.classList.toggle('overdue', over);
+            }
+
+            // Sync to Supabase
+            try {
+                await updateEncounters(huntId, newCount);
+            } catch (e) {
+                console.error('Sync failed:', e.message);
+            }
+        }
+
+        async function handleMarkFound(huntId) {
+            if (!confirm('Mark this Pokémon as found? 🎉')) return;
+            try {
+                await markAsFound(huntId);
+                await loadHunts();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        async function handleDelete(huntId) {
+            if (!confirm('Delete this hunt? This cannot be undone.')) return;
+            try {
+                await deleteHunt(huntId);
+                currentHunts = currentHunts.filter(h => h.id !== huntId);
+                renderHunts();
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        }
+
+        // ── MODAL ────────────────────────────────────────
+        function openModal() {
+            pendingPokemon = null;
+            document.getElementById('pokemon-input').value    = '';
+            document.getElementById('pokemon-preview').classList.remove('visible');
+            document.getElementById('game-select').value      = '';
+            document.getElementById('method-select').innerHTML =
+                '<option value="">Select a method…</option>';
+            document.getElementById('method-select').disabled = true;
+            document.getElementById('odds-display').classList.remove('visible');
+            document.getElementById('modal-alert').innerHTML  = '';
+            document.getElementById('add-modal').classList.add('open');
+            document.getElementById('pokemon-input').focus();
+        }
+
+        function closeModal() {
+            document.getElementById('add-modal').classList.remove('open');
+        }
+
+        // Click outside modal to close
+        document.getElementById('add-modal').addEventListener('click', e => {
+            if (e.target === document.getElementById('add-modal')) closeModal();
+        });
+
+        // ── GAME / METHOD DROPDOWNS ──────────────────────
+        async function loadGames() {
+            const games = await getGames();
+            const select = document.getElementById('game-select');
+            let currentGen = null;
+            let optgroup;
+            games.forEach(g => {
+                if (g.generation !== currentGen) {
+                    if (optgroup) select.appendChild(optgroup);
+                    optgroup = document.createElement('optgroup');
+                    optgroup.label = `Generation ${g.generation}`;
+                    currentGen = g.generation;
+                }
+                const opt = document.createElement('option');
+                opt.value = g.id;
+                opt.textContent = g.name;
+                optgroup.appendChild(opt);
+            });
+            if (optgroup) select.appendChild(optgroup);
+        }
+
+        async function handleGameChange() {
+            const gameId = document.getElementById('game-select').value;
+            const methodSel = document.getElementById('method-select');
+            const oddsEl    = document.getElementById('odds-display');
+
+            methodSel.innerHTML = '<option value="">Select a method…</option>';
+            methodSel.disabled  = !gameId;
+            oddsEl.classList.remove('visible');
+            if (!gameId) return;
+
+            const methods = await getMethodsByGame(gameId);
+            methods.forEach(m => {
+                const opt = document.createElement('option');
+                opt.value = m.id;
+                opt.dataset.odds = m.shiny_odds_denom;
+                opt.textContent  = m.name;
+                methodSel.appendChild(opt);
+            });
+        }
+
+        function handleMethodChange() {
+            const sel  = document.getElementById('method-select');
+            const opt  = sel.options[sel.selectedIndex];
+            const odds = document.getElementById('odds-display');
+            if (opt.dataset.odds) {
+                odds.textContent = `Shiny Odds: 1/${Number(opt.dataset.odds).toLocaleString()}`;
+                odds.classList.add('visible');
+            } else {
+                odds.classList.remove('visible');
+            }
+        }
+
+        // ── POKÉMON SEARCH ───────────────────────────────
+        async function handlePokemonSearch() {
+            const input = document.getElementById('pokemon-input').value.trim();
+            if (!input) return;
+
+            document.getElementById('pokemon-preview').classList.remove('visible');
+            pendingPokemon = null;
+
+            try {
+                const poke = await validatePokemon(input);
+                pendingPokemon = poke;
+                document.getElementById('preview-sprite').src = getShinySprite(poke.id);
+                document.getElementById('preview-name').textContent = poke.name;
+                document.getElementById('pokemon-preview').classList.add('visible');
+                document.getElementById('modal-alert').innerHTML = '';
+            } catch (e) {
+                document.getElementById('modal-alert').innerHTML =
+                    `<div class="alert alert-error">${e.message}</div>`;
+            }
+        }
+
+        // ── ADD HUNT ─────────────────────────────────────
+        async function handleAddHunt() {
+            const methodId = document.getElementById('method-select').value;
+            if (!pendingPokemon)
+                return setModalAlert('Please find a valid Pokémon first.');
+            if (!document.getElementById('game-select').value)
+                return setModalAlert('Please select a game.');
+            if (!methodId)
+                return setModalAlert('Please select a hunting method.');
+
+            try {
+                const hunt = await addHunt(
+                    currentUser.id,
+                    pendingPokemon.name,
+                    pendingPokemon.id,
+                    methodId
+                );
+                currentHunts.unshift(hunt);
+                renderHunts();
+                closeModal();
+            } catch (e) {
+                setModalAlert(e.message);
+            }
+        }
+
+        function setModalAlert(msg) {
+            document.getElementById('modal-alert').innerHTML =
+                `<div class="alert alert-error">${msg}</div>`;
+        }
+
+        init();
+    </script>
+</body>
+</html>

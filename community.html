@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community — ShinyDex</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav>
+        <a href="dashboard.html" class="nav-brand">✨ ShinyDex</a>
+        <div class="nav-links">
+            <a href="dashboard.html" class="nav-link">My Hunts</a>
+            <a href="community.html" class="nav-link active">Community</a>
+        </div>
+        <div class="nav-user">
+            <span class="nav-username" id="nav-username"></span>
+            <button class="btn btn-secondary btn-sm" onclick="signOut()">Log Out</button>
+        </div>
+    </nav>
+
+    <!-- PAGE HEADER -->
+    <div class="page-header">
+        <div>
+            <h1 class="page-title">Community Hunts</h1>
+            <p class="page-subtitle" id="hunt-count">&nbsp;</p>
+        </div>
+    </div>
+
+    <!-- FILTERS -->
+    <div class="filter-bar">
+        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+        <button class="filter-btn"        onclick="setFilter('active', this)">🔍 Active</button>
+        <button class="filter-btn"        onclick="setFilter('found', this)">✨ Found</button>
+    </div>
+
+    <!-- HUNTS -->
+    <div id="hunts-container">
+        <div class="loading">Loading community hunts…</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/hunts.js"></script>
+    <script>
+        let allHunts     = [];
+        let activeFilter = 'all';
+
+        async function init() {
+            const user = await requireAuth();
+            if (!user) return;
+
+            const profile = await getProfile(user.id);
+            document.getElementById('nav-username').textContent =
+                profile?.username || user.email;
+
+            try {
+                allHunts = await getAllHunts();
+                renderHunts();
+            } catch (e) {
+                document.getElementById('hunts-container').innerHTML =
+                    `<div class="loading">Error: ${e.message}</div>`;
+            }
+        }
+
+        function setFilter(filter, btn) {
+            activeFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b =>
+                b.classList.remove('active'));
+            btn.classList.add('active');
+            renderHunts();
+        }
+
+        function renderHunts() {
+            const filtered = allHunts.filter(h => {
+                if (activeFilter === 'active') return !h.found;
+                if (activeFilter === 'found')  return  h.found;
+                return true;
+            });
+
+            document.getElementById('hunt-count').textContent =
+                `${filtered.length} hunt${filtered.length !== 1 ? 's' : ''}`;
+
+            if (filtered.length === 0) {
+                document.getElementById('hunts-container').innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">🔍</span>
+                        <h3>Nothing here yet</h3>
+                        <p>Be the first to start a hunt!</p>
+                    </div>`;
+                return;
+            }
+
+            document.getElementById('hunts-container').innerHTML =
+                `<div class="hunts-grid">
+                    ${filtered.map(h => renderHuntCard(h, false)).join('')}
+                </div>`;
+        }
+
+        init();
+    </script>
+</body>
+</html>

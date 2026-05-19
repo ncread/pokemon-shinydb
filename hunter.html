@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hunter — ShinyDex</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .hunter-profile {
+            display: flex;
+            align-items: center;
+            gap: 1.1rem;
+            padding: 1.4rem 2rem 0;
+        }
+        .hunter-avatar {
+            width: 52px;
+            height: 52px;
+            border-radius: 50%;
+            background: var(--gold-dim);
+            border: 1px solid rgba(232,184,64,0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            flex-shrink: 0;
+        }
+        .hunter-name {
+            font-family: 'Cinzel', serif;
+            font-size: 1.3rem;
+        }
+        .hunter-stats {
+            font-size: 0.82rem;
+            color: var(--text-secondary);
+            margin-top: 0.15rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- NAV -->
+    <nav>
+        <a href="dashboard.html" class="nav-brand">✨ ShinyDex</a>
+        <div class="nav-links">
+            <a href="dashboard.html"  class="nav-link">My Hunts</a>
+            <a href="community.html"  class="nav-link">Community</a>
+        </div>
+        <div class="nav-user">
+            <span class="nav-username" id="nav-username"></span>
+            <button class="btn btn-secondary btn-sm" onclick="signOut()">Log Out</button>
+        </div>
+    </nav>
+
+    <!-- HUNTER PROFILE -->
+    <div class="hunter-profile" id="hunter-header">
+        <div class="loading">Loading…</div>
+    </div>
+
+    <!-- FILTER BAR -->
+    <div class="filter-bar" id="filter-bar" style="display:none">
+        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+        <button class="filter-btn"        onclick="setFilter('active', this)">🔍 Active</button>
+        <button class="filter-btn"        onclick="setFilter('found', this)">✨ Found</button>
+    </div>
+
+    <!-- HUNTS -->
+    <div id="hunts-container">
+        <div class="loading">Loading hunts…</div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase-client.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/hunts.js"></script>
+    <script>
+        let allHunts     = [];
+        let activeFilter = 'all';
+
+        async function init() {
+            const user = await requireAuth();
+            if (!user) return;
+
+            const profile = await getProfile(user.id);
+            document.getElementById('nav-username').textContent =
+                profile?.username || user.email;
+
+            // Read ?user= from the URL
+            const params   = new URLSearchParams(window.location.search);
+            const username = params.get('user');
+
+            if (!username) {
+                window.location.href = 'community.html';
+                return;
+            }
+
+            document.title = `${username} — ShinyDex`;
+
+            try {
+                const { profile: hunterProfile, hunts } =
+                    await getHuntsByUsername(username);
+
+                allHunts = hunts;
+
+                const active = hunts.filter(h => !h.found).length;
+                const found  = hunts.filter(h =>  h.found).length;
+
+                document.getElementById('hunter-header').innerHTML = `
+                    <div class="hunter-avatar">✨</div>
+                    <div>
+                        <div class="hunter-name">${hunterProfile.username}</div>
+                        <div class="hunter-stats">
+                            ${active} active hunt${active !== 1 ? 's' : ''} ·
+                            ${found} shiny${found !== 1 ? ' finds' : ' find'}
+                        </div>
+                    </div>
+                    <a href="community.html"
+                       class="btn btn-secondary btn-sm"
+                       style="margin-left:auto">← Community</a>
+                `;
+
+                document.getElementById('filter-bar').style.display = 'flex';
+                renderHunts();
+
+            } catch (e) {
+                document.getElementById('hunter-header').innerHTML =
+                    `<div class="loading">${e.message}</div>`;
+                document.getElementById('hunts-container').innerHTML = '';
+            }
+        }
+
+        function setFilter(filter, btn) {
+            activeFilter = filter;
+            document.querySelectorAll('.filter-btn').forEach(b =>
+                b.classList.remove('active'));
+            btn.classList.add('active');
+            renderHunts();
+        }
+
+        function renderHunts() {
+            const filtered = allHunts.filter(h => {
+                if (activeFilter === 'active') return !h.found;
+                if (activeFilter === 'found')  return  h.found;
+                return true;
+            });
+
+            if (filtered.length === 0) {
+                document.getElementById('hunts-container').innerHTML = `
+                    <div class="empty-state">
+                        <span class="empty-icon">🔍</span>
+                        <h3>No hunts here</h3>
+                        <p>Nothing to show for this filter.</p>
+                    </div>`;
+                return;
+            }
+
+            // isOwner = false so no edit/delete controls show
+            document.getElementById('hunts-container').innerHTML =
+                `<div class="hunts-grid">
+                    ${filtered.map(h => renderHuntCard(h, false)).join('')}
+                </div>`;
+        }
+
+        init();
+    </script>
+</body>
+</html>
