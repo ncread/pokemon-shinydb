@@ -64,8 +64,8 @@ async function getMyHunts(userId) {
         .select(`
             *,
             methods (
-                id, name, shiny_odds_denom,
-                games ( id, name, generation )
+                method_id, name, shiny_odds_denom,
+                games ( game_id, name, generation )
             )
         `)
         .eq('user_id', userId)
@@ -114,8 +114,8 @@ async function addHunt(userId, pokemonName, pokemonId, methodId) {
         .select(`
             *,
             methods (
-                id, name, shiny_odds_denom,
-                games ( id, name )
+                method_id, name, shiny_odds_denom,
+                games ( game_id, name )
             )
         `)
         .single();

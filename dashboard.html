@@ -47,14 +47,14 @@
 
             <!-- Pokémon search -->
             <div class="form-group">
-                <label class="form-label">Pokémon</label>
+                <label class="form-label">Pokémon Name</label>
                 <div class="input-row">
                     <input type="text" class="form-input" id="pokemon-input"
-                           placeholder="e.g. gastly, ralts, beldum"
+                           placeholder="e.g. Dratini, Mudkip, Solosis"
                            onkeydown="if(event.key==='Enter') handlePokemonSearch()">
                     <button class="btn btn-secondary" onclick="handlePokemonSearch()">Find</button>
                 </div>
-                <span class="form-hint">Type the Pokémon name (Gen 1–6) and click Find</span>
+                <span class="form-hint">Type the Pokémon name (Gen 1–5) and click Find</span>
                 <div class="pokemon-preview" id="pokemon-preview">
                     <img id="preview-sprite" src="" alt="">
                     <span class="pokemon-preview-name" id="preview-name"></span>
@@ -249,7 +249,7 @@
                     currentGen = g.generation;
                 }
                 const opt = document.createElement('option');
-                opt.value = g.id;
+                opt.value = g.game_id;
                 opt.textContent = g.name;
                 optgroup.appendChild(opt);
             });
@@ -258,8 +258,11 @@
 
         async function handleGameChange() {
             const gameId = document.getElementById('game-select').value;
+            console.log('Selected game ID:', gameId);
             const methodSel = document.getElementById('method-select');
             const oddsEl    = document.getElementById('odds-display');
+
+            
 
             methodSel.innerHTML = '<option value="">Select a method…</option>';
             methodSel.disabled  = !gameId;
@@ -267,9 +270,11 @@
             if (!gameId) return;
 
             const methods = await getMethodsByGame(gameId);
+            console.log('Methods returned:', methods);
+
             methods.forEach(m => {
                 const opt = document.createElement('option');
-                opt.value = m.id;
+                opt.value = m.method_id;
                 opt.dataset.odds = m.shiny_odds_denom;
                 opt.textContent  = m.name;
                 methodSel.appendChild(opt);
