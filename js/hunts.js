@@ -82,23 +82,38 @@ async function getAllHunts() {
             methods (
                 name, shiny_odds_denom,
                 games ( name )
-            )
+            ),
+            profiles ( username )
         `)
         .order('created_at', { ascending: false });
     if (error) throw error;
-
-    // Fetch profiles separately and merge (shiny_hunts.user_id → profiles.id)
-    const { data: profiles } = await db
-        .from('profiles')
-        .select('id, username');
-    const profileMap = Object.fromEntries(
-        (profiles || []).map(p => [p.id, p])
-    );
-    return hunts.map(h => ({
-        ...h,
-        profile: profileMap[h.user_id] || { username: 'unknown' }
-    }));
+    return hunts.map(h => ({ ...h, profile: h.profiles }));
 }
+// async function getAllHunts() {
+//     const { data: hunts, error } = await db
+//         .from('shiny_hunts')
+//         .select(`
+//             *,
+//             methods (
+//                 name, shiny_odds_denom,
+//                 games ( name )
+//             )
+//         `)
+//         .order('created_at', { ascending: false });
+//     if (error) throw error;
+
+//     // Fetch profiles separately and merge (shiny_hunts.user_id → profiles.id)
+//     const { data: profiles } = await db
+//         .from('profiles')
+//         .select('id, username');
+//     const profileMap = Object.fromEntries(
+//         (profiles || []).map(p => [p.id, p])
+//     );
+//     return hunts.map(h => ({
+//         ...h,
+//         profile: profileMap[h.user_id] || { username: 'unknown' }
+//     }));
+// }
 
 async function addHunt(userId, pokemonName, pokemonId, methodId) {
     const { data, error } = await db
@@ -140,7 +155,6 @@ async function markAsFound(huntId) {
 }
 
 async function getHuntsByUsername(username) {
-    // First resolve the username to a user id via profiles
     const { data: profile, error: profileError } = await db
         .from('profiles')
         .select('id, username')
@@ -156,14 +170,39 @@ async function getHuntsByUsername(username) {
             methods (
                 name, shiny_odds_denom,
                 games ( name )
-            )
+            ),
+            profiles ( username )
         `)
         .eq('user_id', profile.id)
         .order('created_at', { ascending: false });
     if (error) throw error;
-
-    return { profile, hunts };
+    return { profile, hunts: hunts.map(h => ({ ...h, profile: h.profiles })) };
 }
+// async function getHuntsByUsername(username) {
+//     // First resolve the username to a user id via profiles
+//     const { data: profile, error: profileError } = await db
+//         .from('profiles')
+//         .select('id, username')
+//         .eq('username', username)
+//         .maybeSingle();
+//     if (profileError) throw profileError;
+//     if (!profile) throw new Error(`No hunter found with username "${username}".`);
+
+//     const { data: hunts, error } = await db
+//         .from('shiny_hunts')
+//         .select(`
+//             *,
+//             methods (
+//                 name, shiny_odds_denom,
+//                 games ( name )
+//             )
+//         `)
+//         .eq('user_id', profile.id)
+//         .order('created_at', { ascending: false });
+//     if (error) throw error;
+
+//     return { profile, hunts };
+// }
 
 async function deleteHunt(huntId) {
     const { error } = await db
