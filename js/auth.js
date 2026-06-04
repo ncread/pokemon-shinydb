@@ -70,5 +70,5 @@ async function requireAuth() {
 // Redirect to dashboard if already logged in (for the login page).
 async function redirectIfAuth() {
     const user = await getUser();
-    if (user) window.location.href = '/pokemon-shinydb/';
+    if (user) window.location.href = '/pokemon-shinydb/dashboard/';
 }
