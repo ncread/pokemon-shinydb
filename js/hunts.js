@@ -232,6 +232,7 @@ function renderHuntCard(hunt, isOwner = false) {
                 <button class="encounter-btn" onclick="handleAddEncounters('${hunt.id}', 5)">+5</button>
                 <button class="encounter-btn" onclick="handleAddEncounters('${hunt.id}', 10)">+10</button>
                 <button class="encounter-btn" onclick="handleAddEncounters('${hunt.id}', 50)">+50</button>
+                <button class="encounter-btn" onclick="handleAddEncounters('${hunt.id}', -5)">-5</button>
             </div>
             <div class="hunt-actions-row">
                 <button class="btn btn-success" style="flex:1"
