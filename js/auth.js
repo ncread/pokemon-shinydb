@@ -40,7 +40,7 @@ async function signIn(email, password) {
 
 async function signOut() {
     await db.auth.signOut();
-    window.location.href = 'index.html';
+    window.location.href = '../';
 }
 
 async function getUser() {
@@ -61,7 +61,7 @@ async function getProfile(userId) {
 async function requireAuth() {
     const user = await getUser();
     if (!user) {
-        window.location.href = 'index.html';
+        window.location.href = '../';
         return null;
     }
     return user;
@@ -70,5 +70,5 @@ async function requireAuth() {
 // Redirect to dashboard if already logged in (for the login page).
 async function redirectIfAuth() {
     const user = await getUser();
-    if (user) window.location.href = 'dashboard.html';
+    if (user) window.location.href = '../dashboard/';
 }

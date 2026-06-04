@@ -4,13 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hunter — ShinyDex</title>
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="../css/style.css">
 
-    <link rel="icon" type="image/png" href="/assets/favicon/favicon-96x96.png" sizes="96x96" />
-    <link rel="icon" type="image/svg+xml" href="/assets/favicon/favicon.svg" />
-    <link rel="shortcut icon" href="/assets/favicon/favicon.ico" />
-    <link rel="apple-touch-icon" sizes="180x180" href="/assets/favicon/apple-touch-icon.png" />
-    <link rel="manifest" href="/assets/favicon/site.webmanifest" />
+    <link rel="icon" type="image/png" href="../assets/favicon/favicon-96x96.png" sizes="96x96" />
+    <link rel="icon" type="image/svg+xml" href="../assets/favicon/favicon.svg" />
+    <link rel="shortcut icon" href="../assets/favicon/favicon.ico" />
+    <link rel="apple-touch-icon" sizes="180x180" href="../assets/favicon/apple-touch-icon.png" />
+    <link rel="manifest" href="../assets/favicon/site.webmanifest" />
     <style>
         .hunter-profile {
             display: flex;
@@ -45,10 +45,10 @@
 
     <!-- NAV -->
     <nav>
-        <a href="dashboard.html" class="nav-brand">✨ ShinyDex</a>
+        <a href="../dashboard/" class="nav-brand">✨ ShinyDex</a>
         <div class="nav-links">
-            <a href="dashboard.html"  class="nav-link">My Hunts</a>
-            <a href="community.html"  class="nav-link">Community</a>
+            <a href="../dashboard/"  class="nav-link">My Hunts</a>
+            <a href="../community/"  class="nav-link">Community</a>
         </div>
         <div class="nav-user">
             <span class="nav-username" id="nav-username"></span>
@@ -74,9 +74,9 @@
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase-client.js"></script>
-    <script src="js/auth.js"></script>
-    <script src="js/hunts.js"></script>
+    <script src="../js/supabase-client.js"></script>
+    <script src="../js/auth.js"></script>
+    <script src="../js/hunts.js"></script>
     <script>
         let allHunts     = [];
         let activeFilter = 'all';
@@ -94,7 +94,7 @@
             const username = params.get('user');
 
             if (!username) {
-                window.location.href = 'community.html';
+                window.location.href = '../community/';
                 return;
             }
 
@@ -118,7 +118,7 @@
                             ${found} shiny${found !== 1 ? ' finds' : ' find'}
                         </div>
                     </div>
-                    <a href="community.html"
+                    <a href="../community/"
                        class="btn btn-secondary btn-sm"
                        style="margin-left:auto">← Community</a>
                 `;
