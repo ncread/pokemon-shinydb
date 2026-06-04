@@ -40,7 +40,7 @@ async function signIn(email, password) {
 
 async function signOut() {
     await db.auth.signOut();
-    window.location.href = '../';
+    window.location.href = '/pokemon-shinydb/';
 }
 
 async function getUser() {
