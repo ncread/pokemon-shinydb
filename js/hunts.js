@@ -16,10 +16,14 @@ function formatNumber(n) {
 }
 
 function formatDate(iso) {
-    return new Date(iso).toLocaleDateString(undefined, {
-        year: 'numeric', month: 'short', day: 'numeric'
-    });
+    const date = new Date(iso);
+    return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
+        .toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
+//     return new Date(iso).toLocaleDateString(undefined, {
+//         year: 'numeric', month: 'short', day: 'numeric'
+//     });
+// }
 
 // ── POKEAPI ──────────────────────────────────────────────
 async function validatePokemon(nameOrId) {
