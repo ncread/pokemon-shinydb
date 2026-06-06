@@ -202,7 +202,7 @@ function renderHuntCard(hunt, isOwner = false) {
     const username = hunt.profile?.username || 'unknown';
     const footerHTML = !isOwner ? `
         <div class="hunt-footer">
-            <a class="hunt-user" href="hunter.html?user=${encodeURIComponent(username)}"
+            <a class="hunt-user" href="/pokemon-shinydb/hunter/?user=${encodeURIComponent(username)}"
                style="text-decoration:none; color:var(--teal);">
                 👤 ${username}
             </a>
