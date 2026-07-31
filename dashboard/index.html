@@ -36,6 +36,13 @@
         <button class="btn btn-primary" onclick="openModal()">+ New Hunt</button>
     </div>
 
+    <div class="filter-bar">
+        <input type="text" class="form-input" id="search-input"
+            placeholder="Search Pokémon…"
+            oninput="filterHunts()"
+            style="max-width:280px; padding:0.35rem 0.75rem; font-size:0.85rem;">
+    </div>
+
     <!-- HUNTS -->
     <div id="hunts-container">
         <div class="loading">Loading your hunts…</div>
@@ -166,6 +173,28 @@
             }
 
             container.innerHTML = html;
+        }
+
+        // Filter Hunts
+        function filterHunts() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+            const active = currentHunts.filter(h => !h.found);
+            const found  = currentHunts.filter(h =>  h.found);
+
+            const matchActive = active.filter(h => h.pokemon_name.includes(query));
+            const matchFound  = found.filter(h =>  h.pokemon_name.includes(query));
+
+            let html = '';
+            if (matchActive.length > 0)
+                html += `<div class="hunts-grid">${matchActive.map(h => renderHuntCard(h, true)).join('')}</div>`;
+            if (matchFound.length > 0)
+                html += `
+                    <div class="section-header"><h2>✨ Found Shinies</h2></div>
+                    <div class="hunts-grid">${matchFound.map(h => renderHuntCard(h, true)).join('')}</div>`;
+            if (!matchActive.length && !matchFound.length)
+                html = `<div class="empty-state"><span class="empty-icon">🔍</span><h3>No matches</h3></div>`;
+
+            document.getElementById('hunts-container').innerHTML = html;
         }
 
         // ── ENCOUNTER BUTTONS ────────────────────────────

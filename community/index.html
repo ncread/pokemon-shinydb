@@ -36,10 +36,19 @@
     </div>
 
     <!-- FILTERS -->
+    <!-- <div class="filter-bar">
+        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+        <button class="filter-btn"        onclick="setFilter('active', this)">🔍 Active</button>
+        <button class="filter-btn"        onclick="setFilter('found', this)">✨ Found</button>
+    </div> -->
     <div class="filter-bar">
         <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
         <button class="filter-btn"        onclick="setFilter('active', this)">🔍 Active</button>
         <button class="filter-btn"        onclick="setFilter('found', this)">✨ Found</button>
+        <input type="text" class="form-input" id="search-input"
+            placeholder="Search Pokémon or user…"
+            oninput="renderHunts()"
+            style="max-width:280px; padding:0.35rem 0.75rem; font-size:0.85rem; margin-left:auto;">
     </div>
 
     <!-- HUNTS -->
@@ -80,11 +89,43 @@
             renderHunts();
         }
 
+        // function renderHunts() {
+        //     const filtered = allHunts.filter(h => {
+        //         if (activeFilter === 'active') return !h.found;
+        //         if (activeFilter === 'found')  return  h.found;
+        //         return true;
+        //     });
+
+        //     document.getElementById('hunt-count').textContent =
+        //         `${filtered.length} hunt${filtered.length !== 1 ? 's' : ''}`;
+
+        //     if (filtered.length === 0) {
+        //         document.getElementById('hunts-container').innerHTML = `
+        //             <div class="empty-state">
+        //                 <span class="empty-icon">🔍</span>
+        //                 <h3>Nothing here yet</h3>
+        //                 <p>Be the first to find a shiny!</p>
+        //             </div>`;
+        //         return;
+        //     }
+
+        //     document.getElementById('hunts-container').innerHTML =
+        //         `<div class="hunts-grid">
+        //             ${filtered.map(h => renderHuntCard(h, false)).join('')}
+        //         </div>`;
+        // }
         function renderHunts() {
+            const query = document.getElementById('search-input').value.toLowerCase().trim();
+
             const filtered = allHunts.filter(h => {
-                if (activeFilter === 'active') return !h.found;
-                if (activeFilter === 'found')  return  h.found;
-                return true;
+                const matchFilter =
+                    activeFilter === 'all'    ? true :
+                    activeFilter === 'active' ? !h.found :
+                                                h.found;
+                const matchSearch = !query ||
+                    h.pokemon_name.toLowerCase().includes(query) ||
+                    (h.profile?.username || '').toLowerCase().includes(query);
+                return matchFilter && matchSearch;
             });
 
             document.getElementById('hunt-count').textContent =
@@ -94,8 +135,8 @@
                 document.getElementById('hunts-container').innerHTML = `
                     <div class="empty-state">
                         <span class="empty-icon">🔍</span>
-                        <h3>Nothing here yet</h3>
-                        <p>Be the first to find a shiny!</p>
+                        <h3>No matches</h3>
+                        <p>Try a different search or filter.</p>
                     </div>`;
                 return;
             }
