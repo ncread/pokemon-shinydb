@@ -255,16 +255,20 @@ function renderHuntCard(hunt, isOwner = false) {
         </div>` : '';
     const days = daysElapsed(hunt.created_at, hunt.found ? hunt.found_at : null);
     const dateBarHTML = hunt.found
-        ? `<div class="hunt-datebar">
-               <span>📅 ${formatDateShort(hunt.created_at)}</span>
-               <span class="hunt-datebar-sep">→</span>
-               <span>📅 ${formatDateShort(hunt.found_at)}</span>
-               <span class="hunt-datebar-days">${days}d</span>
-           </div>`
+        ? days < 0
+            ? `<div class="hunt-datebar">
+                <span>Found ${formatDateShort(hunt.found_at)}</span>
+            </div>`
+            : `<div class="hunt-datebar">
+                <span>${formatDateShort(hunt.created_at)}</span>
+                <span class="hunt-datebar-sep">→</span>
+                <span>${formatDateShort(hunt.found_at)}</span>
+                <span class="hunt-datebar-days">${days}d</span>
+            </div>`
         : `<div class="hunt-datebar">
-               <span>📅 ${formatDateShort(hunt.created_at)}</span>
-               <span class="hunt-datebar-days">${days}d elapsed</span>
-           </div>`;
+            <span>${formatDateShort(hunt.created_at)}</span>
+            <span class="hunt-datebar-days">${days}d elapsed</span>
+        </div>`;
 
     return `
         <div class="hunt-card ${isFound ? 'found' : ''} ${isOverdue ? 'overdue' : ''}"
