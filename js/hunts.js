@@ -1,5 +1,37 @@
 // js/hunts.js — hunt CRUD, PokeAPI helpers, card rendering
 
+const GAME_COLORS = {
+    'gold':             '#D4AF37',
+    'silver':           '#c0c0c0',
+    'crystal':          '#4fc8ff',
+    'ruby':             '#c83030',
+    'sapphire':         '#3060d0',
+    'firered':          '#ff4020',
+    'leafgreen':        '#5CA904',
+    'emerald':          '#50C878',
+    'diamond':          '#88aaff',
+    'pearl':            '#ffaacc',
+    'platinum':         '#E5E4E2',
+    'heartgold':        '#e8a000',
+    'soulsilver':       '#c0c0e0',
+    'black':            '#606060',
+    'white':            '#d0d0d0',
+    'black 2':          '#505070',
+    'white 2':          '#b0b0d0',
+    'x':                '#4040d0',
+    'y':                '#c03030',
+    'omega ruby':       '#d03838',
+    'alpha sapphire':   '#2850d0',
+};
+
+function getGameColor(gameName) {
+    return GAME_COLORS[gameName.toLowerCase()] || 'var(--teal)';
+}
+
+
+
+
+
 // ── PROBABILITY ──────────────────────────────────────────
 function luckyOdds(encounters, odds) {
     if (encounters === 0) return 0;
@@ -224,7 +256,7 @@ function renderHuntCard(hunt, isOwner = false) {
                 </div>
                 <div class="hunt-meta">
                     <div class="pokemon-name">${hunt.pokemon_name}</div>
-                    <div class="hunt-game">${gameName}</div>
+                    <div class="hunt-game" style="color:${getGameColor(gameName)}" title="${gameName}">${gameName}</div>
                     <div class="hunt-method">${methodName}</div>
                 </div>
                 <span class="hunt-badge ${isFound ? 'found' : 'active'}">
