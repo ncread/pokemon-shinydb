@@ -489,8 +489,25 @@ nav {
 
 /* ── RESPONSIVE ──────────────────────────────────── */
 @media (max-width:620px) {
-  nav { padding:0.75rem 1rem; }
+  /* nav { padding:0.75rem 1rem; }
   .nav-links { display:none; }
+  .hunts-grid { grid-template-columns:1fr; padding:1rem; }
+  .page-header { padding:1rem; }
+  .filter-bar { padding:0.75rem 1rem 0; }
+  .section-header { padding:0.75rem 1rem 0; }
+} */
+ nav { 
+    padding:0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  .nav-links { 
+    display:flex;
+    width: 100%;
+    order: 3;
+    border-top: 1px solid var(--border);
+    padding-top: 0.5rem;
+  }
   .hunts-grid { grid-template-columns:1fr; padding:1rem; }
   .page-header { padding:1rem; }
   .filter-bar { padding:0.75rem 1rem 0; }
