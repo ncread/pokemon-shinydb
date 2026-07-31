@@ -52,10 +52,19 @@ function formatDate(iso) {
     return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate())
         .toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
 }
-//     return new Date(iso).toLocaleDateString(undefined, {
-//         year: 'numeric', month: 'short', day: 'numeric'
-//     });
-// }
+
+function daysElapsed(startIso, endIso = null) {
+    const start = new Date(startIso);
+    const end   = endIso ? new Date(endIso) : new Date();
+    const diff  = Math.floor((end - start) / (1000 * 60 * 60 * 24));
+    return diff;
+}
+
+function formatDateShort(iso) {
+    return new Date(iso).toLocaleDateString(undefined, {
+        month: 'short', day: 'numeric', year: 'numeric'
+    });
+}
 
 // ── POKEAPI ──────────────────────────────────────────────
 async function validatePokemon(nameOrId) {
@@ -244,6 +253,18 @@ function renderHuntCard(hunt, isOwner = false) {
             </a>
             <span class="hunt-date">${formatDate(hunt.created_at)}</span>
         </div>` : '';
+    const days = daysElapsed(hunt.created_at, hunt.found ? hunt.found_at : null);
+    const dateBarHTML = hunt.found
+        ? `<div class="hunt-datebar">
+               <span>📅 ${formatDateShort(hunt.created_at)}</span>
+               <span class="hunt-datebar-sep">→</span>
+               <span>📅 ${formatDateShort(hunt.found_at)}</span>
+               <span class="hunt-datebar-days">${days}d</span>
+           </div>`
+        : `<div class="hunt-datebar">
+               <span>📅 ${formatDateShort(hunt.created_at)}</span>
+               <span class="hunt-datebar-days">${days}d elapsed</span>
+           </div>`;
 
     return `
         <div class="hunt-card ${isFound ? 'found' : ''} ${isOverdue ? 'overdue' : ''}"
@@ -283,6 +304,7 @@ function renderHuntCard(hunt, isOwner = false) {
 
             ${actionsHTML}
             ${foundBar}
+            ${dateBarHTML}
             ${footerHTML}
         </div>`;
 }

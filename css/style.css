@@ -200,6 +200,22 @@ nav {
   border: 1px solid rgba(232,184,64,0.2);
 }
 
+.hunt-datebar {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 1.2rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+.hunt-datebar-sep { color: var(--border-accent); }
+.hunt-datebar-days {
+    margin-left: auto;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-secondary);
+}
+
 /* ── STATS ROW ───────────────────────────────────── */
 .hunt-stats {
   display: grid;
