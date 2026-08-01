@@ -251,7 +251,6 @@ function renderHuntCard(hunt, isOwner = false) {
                style="text-decoration:none; color:var(--teal);">
                 👤 ${username}
             </a>
-            <span class="hunt-date">${formatDate(hunt.created_at)}</span>
         </div>` : '';
     const days = daysElapsed(hunt.created_at, hunt.found ? hunt.found_at : null);
     const dateBarHTML = days < 0 ? '' : hunt.found
