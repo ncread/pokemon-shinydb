@@ -36,11 +36,6 @@
     </div>
 
     <!-- FILTERS -->
-    <!-- <div class="filter-bar">
-        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-        <button class="filter-btn"        onclick="setFilter('active', this)">🔍 Active</button>
-        <button class="filter-btn"        onclick="setFilter('found', this)">✨ Found</button>
-    </div> -->
     <div class="filter-bar">
         <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
         <button class="filter-btn"        onclick="setFilter('active', this)">🔍 Active</button>
@@ -89,31 +84,6 @@
             renderHunts();
         }
 
-        // function renderHunts() {
-        //     const filtered = allHunts.filter(h => {
-        //         if (activeFilter === 'active') return !h.found;
-        //         if (activeFilter === 'found')  return  h.found;
-        //         return true;
-        //     });
-
-        //     document.getElementById('hunt-count').textContent =
-        //         `${filtered.length} hunt${filtered.length !== 1 ? 's' : ''}`;
-
-        //     if (filtered.length === 0) {
-        //         document.getElementById('hunts-container').innerHTML = `
-        //             <div class="empty-state">
-        //                 <span class="empty-icon">🔍</span>
-        //                 <h3>Nothing here yet</h3>
-        //                 <p>Be the first to find a shiny!</p>
-        //             </div>`;
-        //         return;
-        //     }
-
-        //     document.getElementById('hunts-container').innerHTML =
-        //         `<div class="hunts-grid">
-        //             ${filtered.map(h => renderHuntCard(h, false)).join('')}
-        //         </div>`;
-        // }
         function renderHunts() {
             const query = document.getElementById('search-input').value.toLowerCase().trim();
 

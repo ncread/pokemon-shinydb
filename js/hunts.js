@@ -256,13 +256,11 @@ function renderHuntCard(hunt, isOwner = false) {
     const days = daysElapsed(hunt.created_at, hunt.found ? hunt.found_at : null);
     const dateBarHTML = days < 0 ? '' : hunt.found
         ? `<div class="hunt-datebar">
-            <span>📅 ${formatDateShort(hunt.created_at)}</span>
-            <span class="hunt-datebar-sep">→</span>
-            <span>📅 ${formatDateShort(hunt.found_at)}</span>
+            <span>Found ${formatDateShort(hunt.found_at)}</span>
             <span class="hunt-datebar-days">${days}d</span>
         </div>`
         : `<div class="hunt-datebar">
-            <span>📅 ${formatDateShort(hunt.created_at)}</span>
+            <span>Started ${formatDateShort(hunt.created_at)}</span>
             <span class="hunt-datebar-days">${days}d elapsed</span>
         </div>`;
 

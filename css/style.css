@@ -71,7 +71,7 @@ nav {
   transition: all 0.2s;
 }
 .nav-link:hover, .nav-link.active {
-  color: var(--text-primary);
+  color: var(--gold);
   background: var(--border);
 }
 
@@ -106,7 +106,10 @@ nav {
   color: var(--text-primary);
   border: 1px solid var(--border-accent);
 }
-.btn-secondary:hover { background: var(--border-accent); }
+.btn-secondary:hover { 
+  background: var(--border-accent);
+  color: var(--gold) 
+}
 
 .btn-success {
   background: transparent;
