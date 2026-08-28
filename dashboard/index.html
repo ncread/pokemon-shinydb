@@ -60,14 +60,15 @@
 
             <!-- Pokémon search -->
             <div class="form-group">
-                <label class="form-label">Pokémon Name</label>
-                <div class="input-row">
+                <label class="form-label">Pokémon</label>
+                <div class="pokemon-input-wrap">
                     <input type="text" class="form-input" id="pokemon-input"
-                           placeholder="e.g. Dratini, Mudkip, Solosis"
-                           onkeydown="if(event.key==='Enter') handlePokemonSearch()">
-                    <button class="btn btn-secondary" onclick="handlePokemonSearch()">Find</button>
+                        placeholder="e.g. gastly, mareep"
+                        oninput="handlePokemonInput()"
+                        autocomplete="off">
+                    <div class="pokemon-suggestions" id="pokemon-suggestions" style="display:none"></div>
                 </div>
-                <span class="form-hint">Type the Pokémon name (Gen 2–5) and click Find</span>
+                <span class="form-hint">Type at least 2 letters to search</span>
                 <div class="pokemon-preview" id="pokemon-preview">
                     <img id="preview-sprite" src="" alt="">
                     <span class="pokemon-preview-name" id="preview-name"></span>
@@ -248,6 +249,7 @@
 
         // ── MODAL ────────────────────────────────────────
         function openModal() {
+            loadPokemonList();
             pendingPokemon = null;
             document.getElementById('pokemon-input').value    = '';
             document.getElementById('pokemon-preview').classList.remove('visible');
@@ -329,25 +331,50 @@
         }
 
         // ── POKÉMON SEARCH ───────────────────────────────
-        async function handlePokemonSearch() {
-            const input = document.getElementById('pokemon-input').value.trim();
-            if (!input) return;
-
-            document.getElementById('pokemon-preview').classList.remove('visible');
+        async function handlePokemonInput() {
+            const query = document.getElementById('pokemon-input').value;
+            const suggestionsEl = document.getElementById('pokemon-suggestions');
             pendingPokemon = null;
+            document.getElementById('pokemon-preview').classList.remove('visible');
+
+            const results = searchPokemon(query);
+            if (results.length === 0) {
+                suggestionsEl.style.display = 'none';
+                return;
+            }
+
+            suggestionsEl.innerHTML = results.map(name => `
+                <div class="suggestion-item" onclick="selectPokemon('${name}')">
+                    <img src="${getShinySprite(null, name)}" 
+                        onerror="this.style.display='none'"
+                        alt="${name}">
+                    ${name}
+                </div>`).join('');
+            suggestionsEl.style.display = 'block';
+        }
+
+        async function selectPokemon(name) {
+            document.getElementById('pokemon-input').value = name;
+            document.getElementById('pokemon-suggestions').style.display = 'none';
+            document.getElementById('modal-alert').innerHTML = '';
 
             try {
-                const poke = await validatePokemon(input);
+                const poke = await validatePokemon(name);
                 pendingPokemon = poke;
                 document.getElementById('preview-sprite').src = getShinySprite(poke.id);
                 document.getElementById('preview-name').textContent = poke.name;
                 document.getElementById('pokemon-preview').classList.add('visible');
-                document.getElementById('modal-alert').innerHTML = '';
             } catch (e) {
                 document.getElementById('modal-alert').innerHTML =
                     `<div class="alert alert-error">${e.message}</div>`;
             }
         }
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', e => {
+            if (!e.target.closest('.pokemon-input-wrap'))
+                document.getElementById('pokemon-suggestions').style.display = 'none';
+        });
 
         // ── ADD HUNT ─────────────────────────────────────
         async function handleAddHunt() {

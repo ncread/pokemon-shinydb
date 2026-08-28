@@ -67,19 +67,51 @@ function formatDateShort(iso) {
 }
 
 // ── POKEAPI ──────────────────────────────────────────────
+let pokemonList = null;
+
+const GEN1_5_ALT_FORMS = [
+    'deoxys-attack', 'deoxys-defense', 'deoxys-speed',
+    'wormadam-sandy', 'wormadam-trash',
+    'giratina-origin',
+    'shaymin-sky',
+    'rotom-heat', 'rotom-wash', 'rotom-frost', 'rotom-fan', 'rotom-mow',
+    'tornadus-therian',
+    'thundurus-therian',
+    'landorus-therian',
+    'kyurem-black', 'kyurem-white',
+    'keldeo-resolute',
+    'meloetta-pirouette'
+];
+
+async function loadPokemonList() {
+    if (pokemonList) return pokemonList;
+    const res = await fetch('https://pokeapi.co/api/v2/pokemon?limit=649');
+    const data = await res.json();
+    pokemonList = [...data.results.map(p => p.name), ...GEN1_5_ALT_FORMS];
+    return pokemonList;
+}
+
+function searchPokemon(query) {
+    if (!query || query.length < 2) return [];
+    const q = query.toLowerCase().trim().replace(/\s+/g, '-');
+    return pokemonList.filter(name => name.includes(q)).slice(0, 8);
+}
+
 async function validatePokemon(nameOrId) {
     const query = String(nameOrId).toLowerCase().trim().replace(/\s+/g, '-');
     const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
     if (!res.ok) throw new Error('Pokémon not found — check the spelling and try again.');
     const data = await res.json();
-    // Gen 1–5 = IDs 1–649
-    if (data.id > 649)
-        throw new Error('Only Gen 1–5 Pokémon (Pokédex entries 1–649) are supported on this site.');
+    const isBaseForm = data.id >= 1 && data.id <= 649;
+    const isAltForm  = GEN1_5_ALT_FORMS.includes(data.name);
+    if (!isBaseForm && !isAltForm)
+        throw new Error('Only Gen 1–5 Pokémon are supported on this site.');
     return { id: data.id, name: data.name };
 }
 
-function getShinySprite(pokemonId) {
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${pokemonId}.png`;
+function getShinySprite(pokemonId, name = null) {
+    if (pokemonId) return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${pokemonId}.png`;
+    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${name}.png`;
 }
 
 // ── GAMES & METHODS ──────────────────────────────────────
@@ -238,12 +270,15 @@ function renderHuntCard(hunt, isOwner = false) {
             </div>
         </div>` : '';
 
-    // Found date bar
-    const foundBar = (isFound && hunt.found_at)
-        ? `<div class="found-bar">✨ Found on ${formatDate(hunt.found_at)}</div>`
+    const days = daysElapsed(hunt.created_at, hunt.found ? hunt.found_at : null);
+     const foundBar = (isFound && hunt.found_at)
+        ? `<div class="hunt-datebar">
+               <span>Started ${formatDateShort(hunt.created_at)}</span>
+               ${days >= -1 ? `<span class="hunt-datebar-days">${days + 2}d hunt</span><span class="hunt-datebar-sep">→</span>` : '<span class="hunt-datebar-sep">→</span>'}
+           </div>
+           ${isOwner ? `<div class="found-bar">✨ Found on ${formatDate(hunt.found_at)}</div>` : ''}`
         : '';
 
-    // Community footer (username + date)
     const username = hunt.profile?.username || 'unknown';
     const footerHTML = !isOwner ? `
         <div class="hunt-footer">
@@ -251,9 +286,9 @@ function renderHuntCard(hunt, isOwner = false) {
                style="text-decoration:none; color:var(--teal);">
                 👤 ${username}
             </a>
-            <span class="hunt-date">${formatDate(hunt.created_at)}</span>
+            ${isFound && hunt.found_at ? `<span style="font-size:0.76rem; color:var(--gold);">✨ Found on ${formatDate(hunt.found_at)}</span>` : ''}
         </div>` : '';
-    const days = daysElapsed(hunt.created_at, hunt.found ? hunt.found_at : null);
+
     const dateBarHTML = days < 0 ? '' : hunt.found
         ? `<div class="hunt-datebar">
             <span>Found ${formatDateShort(hunt.found_at)}</span>

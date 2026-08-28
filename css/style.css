@@ -420,6 +420,39 @@ nav {
   text-transform:capitalize;
 }
 
+.pokemon-suggestions {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg-modal);
+    border: 1px solid var(--border-accent);
+    border-top: none;
+    border-radius: 0 0 var(--radius-sm) var(--radius-sm);
+    z-index: 300;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    padding: 0.5rem 0.85rem;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-transform: capitalize;
+    transition: background 0.15s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.suggestion-item:hover { background: var(--border); color: var(--gold); }
+.suggestion-item img {
+    width: 28px; height: 28px;
+    image-rendering: pixelated;
+}
+
+.pokemon-input-wrap { position: relative; }
+
 /* Odds chip */
 .odds-display {
   display: none;
