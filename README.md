@@ -1,12 +1,18 @@
 <div align="center">
 <h1 style=color:blue>Pokémon ✨ Shiny Hunting Database</h1>
-<img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXgwYnpmMGJsenN5aWFyZGU1Zzc3eW8xb2JvbzZic2F4cnRtNHVzNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AFpghpBCYEAwM/giphy.gif" Pikachu Walking with Ketchup/>
 </div>
 
 <div align="center">
 <h2>Keep track of your Generation 2-5 ✨ shiny hunts and share your progress with other community members.</h2>
 </div>
 <br>
+
+## Demo
+What you need: username (displayed for other users to see), email address, and password. Backend authentication is taken care of by Supabase.
+
+<div align="center">
+    <video src="assets/shinydb_demo.mp4" width="100%" controls></video>
+</div>
 
 ## Inspiration
 I grew up playing Pokémon Red and Silver on my original Gameboy, relying on the snap-on [Gameboy light and magnifying glass](https://www.thevintagegamers.com/2013/11/game-boy-screen-magnifiers/) when playing at night and light from my bedroom window in the early mornings. Shoutout to the family in our neighborhood who let me purchase two original Gameboys, two copies of Red, Silver, and a host of other games for a few crumpled up bucks back in the day.
@@ -22,3 +28,7 @@ In addition to creating hunts, users can delete their hunts, view other users' h
 
 ## Get Started
 Simply sign up using your email, set a password for your account, and start some shiny hunting!
+
+<div align="center">
+    <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaXgwYnpmMGJsenN5aWFyZGU1Zzc3eW8xb2JvbzZic2F4cnRtNHVzNCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/AFpghpBCYEAwM/giphy.gif" Pikachu Walking with Ketchup/>
+</div>
