@@ -1,3 +1,4 @@
+
 <div align="center">
 <h1 style=color:blue>Pokémon ✨ Shiny Hunting Database</h1>
 </div>
@@ -10,9 +11,8 @@
 ## Demo
 What you need: username (displayed for other users to see), email address, and password. Backend authentication is taken care of by Supabase.
 
-<div align="center">
-    <video src="assets/shinydb_demo.mp4" width="100%" controls></video>
-</div>
+https://github.com/user-attachments/assets/051df1aa-e555-49f0-8557-a1b6d3c2b2a9
+
 
 ## Inspiration
 I grew up playing Pokémon Red and Silver on my original Gameboy, relying on the snap-on [Gameboy light and magnifying glass](https://www.thevintagegamers.com/2013/11/game-boy-screen-magnifiers/) when playing at night and light from my bedroom window in the early mornings. Shoutout to the family in our neighborhood who let me purchase two original Gameboys, two copies of Red, Silver, and a host of other games for a few crumpled up bucks back in the day.
