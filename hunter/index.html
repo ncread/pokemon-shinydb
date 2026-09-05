@@ -52,6 +52,9 @@
         </div>
         <div class="nav-user">
             <span class="nav-username" id="nav-username"></span>
+            <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                <img id="theme-icon" src="" alt="theme" style="width:24px; height:24px; image-rendering:pixelated;">
+            </button>
             <button class="btn btn-secondary btn-sm" onclick="signOut()">Log Out</button>
         </div>
     </nav>
@@ -82,6 +85,7 @@
         let activeFilter = 'all';
 
         async function init() {
+            applyTheme()
             const user = await requireAuth();
             if (!user) return;
 

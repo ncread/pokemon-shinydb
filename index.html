@@ -143,6 +143,11 @@
         </div>
 
         <div class="auth-card">
+                <div style="text-align:right; padding:0.6rem 0.8rem 0;">
+                    <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                        <img id="theme-icon" src="" alt="theme" style="width:24px; height:24px; image-rendering:pixelated;">
+                    </button>
+                </div>
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="switchTab('login')">Log In</button>
                 <button class="auth-tab"        onclick="switchTab('signup')">Sign Up</button>
@@ -265,6 +270,7 @@
         });
 
         // Redirect to dashboard if already logged in
+        applyTheme();
         redirectIfAuth();
     </script>
 </body>

@@ -72,3 +72,22 @@ async function redirectIfAuth() {
     const user = await getUser();
     if (user) window.location.href = '/pokemon-shinydb/dashboard/';
 }
+
+const THEME_SPRITES = {
+    dark:  'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/197.png',
+    light: 'https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/181.png'
+};
+
+function applyTheme() {
+    const light = localStorage.getItem('theme') === 'light';
+    document.body.classList.toggle('light', light);
+    const icon = document.getElementById('theme-icon');
+    if (icon) icon.src = light ? THEME_SPRITES.dark : THEME_SPRITES.light;
+}
+
+function toggleTheme() {
+    const isLight = document.body.classList.toggle('light');
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    const icon = document.getElementById('theme-icon');
+    if (icon) icon.src = isLight ? THEME_SPRITES.dark : THEME_SPRITES.light;
+}

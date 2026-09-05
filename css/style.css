@@ -28,6 +28,39 @@
   --glow-teal:      0 0 24px rgba(56,200,168,0.18);
 }
 
+body.light {
+    --bg:             #f0f0f8;
+    --bg-card:        #ffffff;
+    --bg-card-hover:  #f5f5ff;
+    --bg-modal:       #ffffff;
+    --bg-input:       #f0f0f8;
+    --border:         #dcdcee;
+    --border-accent:  #c8c8e0;
+    --text-primary:   #1a1a2e;
+    --text-secondary: #5050a0;
+    --text-muted:     #9090b8;
+    --gold-dim:       rgba(232,184,64,0.15);
+    --teal-dim:       rgba(56,200,168,0.15);
+    --found-dim:      rgba(80,216,128,0.12);
+    --danger-dim:     rgba(216,64,80,0.12);
+}
+
+.theme-toggle {
+    background: none;
+    border: 1px solid var(--border-accent);
+    color: var(--text-secondary);
+    border-radius: var(--radius-sm);
+    padding: 0.38rem 0.6rem;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: all 0.2s;
+    line-height: 1;
+}
+.theme-toggle:hover {
+    background: var(--border);
+    color: var(--text-primary);
+}
+
 * { margin:0; padding:0; box-sizing:border-box; }
 
 body {
