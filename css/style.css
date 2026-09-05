@@ -203,20 +203,38 @@ nav {
   border: 1px solid rgba(232,184,64,0.2);
 }
 
-.hunt-datebar {
+/* ── Phases ───────────────────────────────────── */
+.hunt-phases {
     display: flex;
     align-items: center;
     gap: 0.5rem;
-    padding: 0.45rem 1.2rem;
+    padding: 0.55rem 1.2rem;
     border-top: 1px solid var(--border);
-    font-size: 0.72rem;
-    color: var(--text-muted);
+    flex-wrap: wrap;
 }
-.hunt-datebar-sep { color: var(--border-accent); }
-.hunt-datebar-days {
-    margin-left: auto;
+.phase-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-right: 0.2rem;
+}
+.phase-chip {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    background: var(--gold-dim);
+    border: 1px solid rgba(232,184,64,0.18);
+    border-radius: 20px;
+    padding: 0.15rem 0.5rem 0.15rem 0.2rem;
+    font-size: 0.72rem;
     font-family: 'JetBrains Mono', monospace;
-    color: var(--text-secondary);
+    color: var(--gold);
+}
+.phase-chip img {
+    width: 24px;
+    height: 24px;
+    image-rendering: pixelated;
 }
 
 /* ── STATS ROW ───────────────────────────────────── */
@@ -275,6 +293,21 @@ nav {
 }
 .hunt-actions-row { display:flex; gap:0.45rem; align-items:center; }
 
+.hunt-datebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.45rem 1.2rem;
+    border-top: 1px solid var(--border);
+    font-size: 0.72rem;
+    color: var(--text-muted);
+}
+.hunt-datebar-sep { color: var(--border-accent); }
+.hunt-datebar-days {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--text-secondary);
+}
 /* ── COMMUNITY CARD FOOTER ───────────────────────── */
 .hunt-footer {
   padding: 0.65rem 1.2rem;

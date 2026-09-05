@@ -101,6 +101,40 @@
         </div>
     </div>
 
+    <div class="modal-overlay" id="phase-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <span class="modal-title">Add Phase</span>
+            <button class="modal-close" onclick="closePhaseModal()">×</button>
+        </div>
+        <div id="phase-modal-alert"></div>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:1rem;">
+            Found a different shiny during this hunt? Add it as a phase — 
+            it'll create a found hunt card and reset this hunt's encounter count to 0.
+        </p>
+        <div class="form-group">
+            <label class="form-label">Pokémon Found</label>
+            <div class="pokemon-input-wrap">
+                <input type="text" class="form-input" id="phase-pokemon-input"
+                       placeholder="e.g. machop"
+                       oninput="handlePhaseInput()"
+                       onkeydown="handlePhaseSuggestionNav(event)"
+                       autocomplete="off">
+                <div class="pokemon-suggestions" id="phase-suggestions" style="display:none"></div>
+            </div>
+            <div class="pokemon-preview" id="phase-preview">
+                <img id="phase-preview-sprite" src="" alt="">
+                <span class="pokemon-preview-name" id="phase-preview-name"></span>
+            </div>
+        </div>
+        <button class="btn btn-primary"
+                style="width:100%; padding:0.72rem; margin-top:0.4rem"
+                onclick="handleAddPhase()">
+            Confirm Phase
+        </button>
+    </div>
+</div>
+
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../js/supabase-client.js"></script>
     <script src="../js/auth.js"></script>
@@ -271,6 +305,106 @@
         document.getElementById('add-modal').addEventListener('click', e => {
             if (e.target === document.getElementById('add-modal')) closeModal();
         });
+
+        // Phases
+        let phaseTargetHuntId = null;
+        let pendingPhasePokemon = null;
+        let phaseSuggestionIndex = -1;
+
+        function openPhaseModal(huntId) {
+            phaseTargetHuntId = huntId;
+            pendingPhasePokemon = null;
+            phaseSuggestionIndex = -1;
+            document.getElementById('phase-pokemon-input').value = '';
+            document.getElementById('phase-suggestions').style.display = 'none';
+            document.getElementById('phase-preview').classList.remove('visible');
+            document.getElementById('phase-modal-alert').innerHTML = '';
+            document.getElementById('phase-modal').classList.add('open');
+            document.getElementById('phase-pokemon-input').focus();
+        }
+
+        function closePhaseModal() {
+            document.getElementById('phase-modal').classList.remove('open');
+        }
+
+        document.getElementById('phase-modal').addEventListener('click', e => {
+            if (e.target === document.getElementById('phase-modal')) closePhaseModal();
+        });
+
+        async function handlePhaseInput() {
+            const query = document.getElementById('phase-pokemon-input').value;
+            const suggestionsEl = document.getElementById('phase-suggestions');
+            pendingPhasePokemon = null;
+            phaseSuggestionIndex = -1;
+            document.getElementById('phase-preview').classList.remove('visible');
+
+            const results = searchPokemon(query);
+            if (results.length === 0) { suggestionsEl.style.display = 'none'; return; }
+
+            suggestionsEl.innerHTML = results.map(name => `
+                <div class="suggestion-item" onclick="selectPhasePokemon('${name}')">
+                    <img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${name}.png"
+                        onerror="this.src='https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${name.split('-')[0]}.png'"
+                        alt="${name}">
+                    ${name}
+                </div>`).join('');
+            suggestionsEl.style.display = 'block';
+        }
+
+        async function selectPhasePokemon(name) {
+            document.getElementById('phase-pokemon-input').value = name;
+            document.getElementById('phase-suggestions').style.display = 'none';
+            try {
+                const poke = await validatePokemon(name);
+                pendingPhasePokemon = poke;
+                document.getElementById('phase-preview-sprite').src = getShinySprite(poke.id);
+                document.getElementById('phase-preview-name').textContent = poke.name;
+                document.getElementById('phase-preview').classList.add('visible');
+                document.getElementById('phase-modal-alert').innerHTML = '';
+            } catch (e) {
+                document.getElementById('phase-modal-alert').innerHTML =
+                    `<div class="alert alert-error">${e.message}</div>`;
+            }
+        }
+
+        function handlePhaseSuggestionNav(e) {
+            const items = document.querySelectorAll('#phase-suggestions .suggestion-item');
+            if (!items.length) return;
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                phaseSuggestionIndex = Math.min(phaseSuggestionIndex + 1, items.length - 1);
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                phaseSuggestionIndex = Math.max(phaseSuggestionIndex - 1, 0);
+            } else if (e.key === 'Enter') {
+                e.preventDefault();
+                if (phaseSuggestionIndex >= 0) items[phaseSuggestionIndex].click();
+                return;
+            } else if (e.key === 'Escape') {
+                document.getElementById('phase-suggestions').style.display = 'none';
+                return;
+            } else return;
+            items.forEach((item, i) =>
+                item.classList.toggle('active', i === phaseSuggestionIndex));
+        }
+
+        async function handleAddPhase() {
+            if (!pendingPhasePokemon)
+                return document.getElementById('phase-modal-alert').innerHTML =
+                    `<div class="alert alert-error">Please select a Pokémon first.</div>`;
+
+            const parentHunt = currentHunts.find(h => h.id === phaseTargetHuntId);
+            if (!parentHunt) return;
+
+            try {
+                await addPhaseHunt(parentHunt, pendingPhasePokemon.name, pendingPhasePokemon.id);
+                closePhaseModal();
+                await loadHunts();
+            } catch (e) {
+                document.getElementById('phase-modal-alert').innerHTML =
+                    `<div class="alert alert-error">${e.message}</div>`;
+            }
+        }
 
         // ── GAME / METHOD DROPDOWNS ──────────────────────
         async function loadGames() {

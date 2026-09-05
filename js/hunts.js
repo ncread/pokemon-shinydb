@@ -143,9 +143,13 @@ async function getMyHunts(userId) {
             methods (
                 method_id, name, shiny_odds_denom,
                 games ( game_id, name, generation )
+            ),
+            phases:shiny_hunts!phase_of (
+                id, pokemon_name, pokemon_id, encounter_count
             )
         `)
         .eq('user_id', userId)
+        .is('phase_of', null)
         .order('created_at', { ascending: false });
     if (error) throw error;
     return data;
@@ -160,11 +164,20 @@ async function getAllHunts() {
                 name, shiny_odds_denom,
                 games ( name )
             ),
-            profiles ( username )
+            phases:shiny_hunts!phase_of (
+                id, pokemon_name, pokemon_id, encounter_count
+            )
         `)
+        .is('phase_of', null)
         .order('created_at', { ascending: false });
     if (error) throw error;
-    return hunts.map(h => ({ ...h, profile: h.profiles }));
+    const { data: profiles } = await db
+        .from('profiles')
+        .select('id, username');
+    const profileMap = Object.fromEntries(
+        (profiles || []).map(p => [p.id, p])
+    );
+    return hunts.map(h => ({ ...h, profile: profileMap[h.user_id] || { username: 'unknown' } }));
 }
 
 
@@ -189,6 +202,35 @@ async function addHunt(userId, pokemonName, pokemonId, methodId) {
         .single();
     if (error) throw error;
     return data;
+}
+
+async function addPhaseHunt(parentHunt, phasePokemonName, phasePokemonId) {
+    // Insert the phase hunt (the pokemon that was found)
+    const { data: phaseHunt, error: phaseError } = await db
+        .from('shiny_hunts')
+        .insert({
+            user_id:        parentHunt.user_id,
+            pokemon_name:   phasePokemonName,
+            pokemon_id:     phasePokemonId,
+            method_id:      parentHunt.method_id,
+            encounter_count: parentHunt.encounter_count,
+            found:          true,
+            found_at:       new Date().toISOString(),
+            created_at:     parentHunt.created_at,
+            phase_of:       parentHunt.id
+        })
+        .select(`*, methods ( name, shiny_odds_denom, games ( name ) )`)
+        .single();
+    if (phaseError) throw phaseError;
+
+    // Reset parent encounter count to 0
+    const { error: resetError } = await db
+        .from('shiny_hunts')
+        .update({ encounter_count: 0 })
+        .eq('id', parentHunt.id);
+    if (resetError) throw resetError;
+
+    return phaseHunt;
 }
 
 async function updateEncounters(huntId, newCount) {
@@ -265,20 +307,40 @@ function renderHuntCard(hunt, isOwner = false) {
             <div class="hunt-actions-row">
                 <button class="btn btn-success" style="flex:1"
                     onclick="handleMarkFound('${hunt.id}')">✨ Mark as Found!</button>
+                <button class="btn btn-secondary btn-sm"
+                    onclick="openPhaseModal('${hunt.id}')">+ Phase</button>
                 <button class="btn btn-danger"
                     onclick="handleDelete('${hunt.id}')">✕</button>
             </div>
         </div>` : '';
 
     const days = daysElapsed(hunt.created_at, hunt.found ? hunt.found_at : null);
-     const foundBar = (isFound && hunt.found_at)
+    const foundBar = (isFound && hunt.found_at)
         ? `<div class="hunt-datebar">
                <span>Started ${formatDateShort(hunt.created_at)}</span>
-               ${days >= -1 ? `<span class="hunt-datebar-days">${days + 2}d hunt</span><span class="hunt-datebar-sep">→</span>` : '<span class="hunt-datebar-sep">→</span>'}
+               ${days >= -1 ? `<span class="hunt-datebar-days">${days + 2}d hunt</span>` : ''}
            </div>
            ${isOwner ? `<div class="found-bar">✨ Found on ${formatDate(hunt.found_at)}</div>` : ''}`
         : '';
 
+    //Phases
+    const phases = hunt.phases || [];
+    const phasesHTML = phases.length > 0 ? `
+        <div class="hunt-phases">
+            <span class="phase-label">Phases</span>
+            ${phases.map(p => `
+                <div class="phase-chip" title="${p.pokemon_name} — found at ${formatNumber(p.encounter_count)} encounters">
+                    <img src="${getShinySprite(p.pokemon_id)}" alt="${p.pokemon_name}">
+                    <span>${formatNumber(p.encounter_count)}</span>
+                </div>`).join('')}
+        </div>` : '';
+
+    // Found date bar
+    // const foundBar = (isFound && hunt.found_at)
+    //     ? `<div class="found-bar">✨ Found on ${formatDate(hunt.found_at)}</div>`
+    //     : '';
+
+    // Community footer (username + date)
     const username = hunt.profile?.username || 'unknown';
     const footerHTML = !isOwner ? `
         <div class="hunt-footer">
@@ -335,6 +397,7 @@ function renderHuntCard(hunt, isOwner = false) {
                 </div>
             </div>
 
+            ${phasesHTML}
             ${actionsHTML}
             ${foundBar}
             ${dateBarHTML}
