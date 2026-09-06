@@ -26,6 +26,53 @@ This application leverages Supabase for backend purposes and user authentication
 
 In addition to creating hunts, users can delete their hunts, view other users' hunts, and of course update the number of encounters and shiny discovery status, allowing database CRUD operations to be performed all from the interface itself.
 
+## Database Schema
+```mermaid
+erDiagram
+    profiles {
+        uuid id PK
+        text username
+        timestamp created_at
+    }
+
+    auth_users {
+        uuid id PK
+    }
+
+    shiny_hunts {
+        uuid id PK
+        uuid user_id FK
+        text pokemon_name
+        int pokemon_id
+        uuid method_id FK
+        int encounter_count
+        bool found
+        date found_at
+        timestamp created_at
+        uuid phase_of FK
+    }
+
+    methods {
+        uuid method_id PK
+        text name
+        int shiny_odds_denom
+        uuid game_id FK
+    }
+
+    games {
+        uuid game_id PK
+        text name
+        int generation
+    }
+
+    auth_users ||--|| profiles : "extends"
+    profiles ||--o{ shiny_hunts : "creates"
+    shiny_hunts }o--|| methods : "leverages"
+    games }o--o{ methods : "has"
+    shiny_hunts }o--o| shiny_hunts : "phase of"
+
+```
+
 ## Get Started
 Simply sign up using your email, set a password for your account, and start some shiny hunting!
 
