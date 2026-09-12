@@ -237,21 +237,21 @@ nav {
 }
 
 /* ── Phases ───────────────────────────────────── */
+.hunt-card-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.35rem;
+    flex-shrink: 0;
+}
+
 .hunt-phases {
     display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    padding: 0.55rem 1.2rem;
-    border-top: 1px solid var(--border);
-    flex-wrap: wrap;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.25rem;
 }
-.phase-label {
-    font-size: 0.68rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-muted);
-    margin-right: 0.2rem;
-}
+
 .phase-chip {
     display: flex;
     align-items: center;
@@ -264,10 +264,78 @@ nav {
     font-family: 'JetBrains Mono', monospace;
     color: var(--gold);
 }
+
 .phase-chip img {
     width: 24px;
     height: 24px;
     image-rendering: pixelated;
+}
+
+.phase-label {
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-right: 0.2rem;
+}
+.phase-bubble-wrap {
+    position: relative;
+    display: inline-block;
+}
+
+.phase-bubble {
+    font-size: 0.7rem;
+    padding: 0.18rem 0.55rem;
+    border-radius: 20px;
+    background: var(--gold-dim);
+    border: 1px solid rgba(232,184,64,0.2);
+    color: var(--gold);
+    cursor: default;
+    white-space: nowrap;
+}
+
+.phase-tooltip {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 6px);
+    background: var(--bg-modal);
+    border: 1px solid var(--border-accent);
+    border-radius: var(--radius-sm);
+    padding: 0.5rem 0.65rem;
+    z-index: 50;
+    min-width: 160px;
+    box-shadow: var(--shadow);
+}
+
+.phase-bubble-wrap:hover .phase-tooltip {
+    display: block;
+}
+
+.phase-tooltip-row {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0;
+}
+
+.phase-tooltip-row img {
+    width: 28px;
+    height: 28px;
+    image-rendering: pixelated;
+}
+
+.phase-tooltip-name {
+    font-size: 0.78rem;
+    text-transform: capitalize;
+    flex: 1;
+    color: var(--text-primary);
+}
+
+.phase-tooltip-count {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--gold);
 }
 
 /* ── STATS ROW ───────────────────────────────────── */
@@ -512,10 +580,10 @@ nav {
 }
 
 .suggestion-item:hover { background: var(--border); color: var(--gold); }
-.suggestion-item img {
+/* .suggestion-item img {
     width: 28px; height: 28px;
     image-rendering: pixelated;
-}
+} */
 
 .pokemon-input-wrap { position: relative; }
 

@@ -40,13 +40,13 @@
 
     <!-- FILTERS -->
     <div class="filter-bar">
-        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
-        <button class="filter-btn"        onclick="setFilter('active', this)">🔍 Active</button>
-        <button class="filter-btn"        onclick="setFilter('found', this)">✨ Found</button>
         <input type="text" class="form-input" id="search-input"
             placeholder="Search Pokémon or user…"
             oninput="renderHunts()"
-            style="max-width:280px; padding:0.35rem 0.75rem; font-size:0.85rem; margin-left:auto;">
+            style="max-width:280px; padding:0.35rem 0.75rem; font-size:0.85rem;">
+        <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+        <button class="filter-btn"        onclick="setFilter('active', this)">🔍 Hunting</button>
+        <button class="filter-btn"        onclick="setFilter('found', this)">✨ Found</button>
     </div>
 
     <!-- HUNTS -->

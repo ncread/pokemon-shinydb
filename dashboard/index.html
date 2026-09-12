@@ -316,6 +316,7 @@
         let phaseSuggestionIndex = -1;
 
         function openPhaseModal(huntId) {
+            loadPokemonList();  // add this line
             phaseTargetHuntId = huntId;
             pendingPhasePokemon = null;
             phaseSuggestionIndex = -1;
@@ -401,9 +402,31 @@
             if (!parentHunt) return;
 
             try {
-                await addPhaseHunt(parentHunt, pendingPhasePokemon.name, pendingPhasePokemon.id);
+                const phaseHunt = await addPhaseHunt(parentHunt, pendingPhasePokemon.name, pendingPhasePokemon.id);
+                
+                // Reset parent encounter count locally
+                parentHunt.encounter_count = 0;
+                const card = document.getElementById(`hunt-card-${parentHunt.id}`);
+                if (card) {
+                    card.querySelector('.encounter-display').textContent = '0';
+                    card.querySelector('.prob-display').textContent = '0.00%';
+                }
+
+                // Add phase to parent's phases array and re-render that card
+                if (!parentHunt.phases) parentHunt.phases = [];
+                parentHunt.phases.push({
+                    id: phaseHunt.id,
+                    pokemon_name: pendingPhasePokemon.name,
+                    pokemon_id: pendingPhasePokemon.id,
+                    encounter_count: phaseHunt.encounter_count
+                });
+
+                // Add phase hunt to currentHunts and render it as a found card
+                phaseHunt.methods = parentHunt.methods;
+                phaseHunt.phases  = [];
+                currentHunts.unshift(phaseHunt);
+                renderHunts();
                 closePhaseModal();
-                await loadHunts();
             } catch (e) {
                 document.getElementById('phase-modal-alert').innerHTML =
                     `<div class="alert alert-error">${e.message}</div>`;
@@ -483,9 +506,6 @@
 
             suggestionsEl.innerHTML = results.map(name => `
                 <div class="suggestion-item" onclick="selectPokemon('${name}')">
-                    <img src="${getShinySprite(null, name)}" 
-                        onerror="this.style.display='none'"
-                        alt="${name}">
                     ${name}
                 </div>`).join('');
             suggestionsEl.style.display = 'block';

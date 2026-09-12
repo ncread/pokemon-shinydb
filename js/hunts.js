@@ -136,7 +136,8 @@ async function getMethodsByGame(gameId) {
 
 // ── HUNTS ────────────────────────────────────────────────
 async function getMyHunts(userId) {
-    const { data, error } = await db
+    // Parent hunts with their phase chips
+    const { data: parentHunts, error: parentError } = await db
         .from('shiny_hunts')
         .select(`
             *,
@@ -151,8 +152,25 @@ async function getMyHunts(userId) {
         .eq('user_id', userId)
         .is('phase_of', null)
         .order('created_at', { ascending: false });
-    if (error) throw error;
-    return data;
+    if (parentError) throw parentError;
+
+    // Phase hunts as their own found cards
+    const { data: phaseHunts, error: phaseError } = await db
+        .from('shiny_hunts')
+        .select(`
+            *,
+            methods (
+                method_id, name, shiny_odds_denom,
+                games ( game_id, name, generation )
+            )
+        `)
+        .eq('user_id', userId)
+        .not('phase_of', 'is', null)
+        .order('created_at', { ascending: false });
+    if (phaseError) throw phaseError;
+
+    const phaseHuntsWithEmpty = (phaseHunts || []).map(h => ({ ...h, phases: [] }));
+    return [...parentHunts, ...phaseHuntsWithEmpty];
 }
 
 async function getAllHunts() {
@@ -190,7 +208,8 @@ async function addHunt(userId, pokemonName, pokemonId, methodId) {
             pokemon_id: pokemonId,
             method_id: methodId,
             encounter_count: 0,
-            found: false
+            found: false,
+            created_at: new Date().toISOString()
         })
         .select(`
             *,
@@ -201,7 +220,7 @@ async function addHunt(userId, pokemonName, pokemonId, methodId) {
         `)
         .single();
     if (error) throw error;
-    return data;
+    return { ...data, phases: [] };
 }
 
 async function addPhaseHunt(parentHunt, phasePokemonName, phasePokemonId) {
@@ -326,13 +345,18 @@ function renderHuntCard(hunt, isOwner = false) {
     //Phases
     const phases = hunt.phases || [];
     const phasesHTML = phases.length > 0 ? `
-        <div class="hunt-phases">
-            <span class="phase-label">Phases</span>
-            ${phases.map(p => `
-                <div class="phase-chip" title="${p.pokemon_name} — found at ${formatNumber(p.encounter_count)} encounters">
-                    <img src="${getShinySprite(p.pokemon_id)}" alt="${p.pokemon_name}">
-                    <span>${formatNumber(p.encounter_count)}</span>
-                </div>`).join('')}
+        <div class="phase-bubble-wrap">
+            <div class="phase-bubble">
+                ✨ ${phases.length} phase${phases.length > 1 ? 's' : ''}
+            </div>
+            <div class="phase-tooltip">
+                ${phases.map(p => `
+                    <div class="phase-tooltip-row">
+                        <img src="${getShinySprite(p.pokemon_id)}" alt="${p.pokemon_name}">
+                        <span class="phase-tooltip-name">${p.pokemon_name}</span>
+                        <span class="phase-tooltip-count">${formatNumber(p.encounter_count)}</span>
+                    </div>`).join('')}
+            </div>
         </div>` : '';
 
     // Found date bar
@@ -375,9 +399,12 @@ function renderHuntCard(hunt, isOwner = false) {
                     <div class="hunt-game" style="color:${getGameColor(gameName)}" title="${gameName}">${gameName}</div>
                     <div class="hunt-method">${methodName}</div>
                 </div>
-                <span class="hunt-badge ${isFound ? 'found' : 'active'}">
-                    ${isFound ? '✨ Found' : '🔍 Hunting'}
-                </span>
+                <div class="hunt-card-right">
+                    <span class="hunt-badge ${isFound ? 'found' : 'active'}">
+                        ${isFound ? '✨ Found' : '🔍 Hunting'}
+                    </span>
+                    ${phasesHTML}
+                </div>
             </div>
 
             <div class="hunt-stats">
@@ -397,7 +424,6 @@ function renderHuntCard(hunt, isOwner = false) {
                 </div>
             </div>
 
-            ${phasesHTML}
             ${actionsHTML}
             ${foundBar}
             ${dateBarHTML}
