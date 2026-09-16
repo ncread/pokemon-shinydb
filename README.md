@@ -1,4 +1,6 @@
 
+
+
 <div align="center">
 <h1 style=color:blue>Pokémon ✨ Shiny Hunting Database</h1>
 </div>
@@ -9,9 +11,12 @@
 <br>
 
 ## Demo
-What you need: username (displayed for other users to see), email address, and password. Backend authentication is taken care of by Supabase.
+What you need: username (displayed for other users to see), email address and password (neither email nor password is visible to others). Backend authentication is taken care of by Supabase.
 
-https://github.com/user-attachments/assets/051df1aa-e555-49f0-8557-a1b6d3c2b2a9
+https://github.com/user-attachments/assets/1f5d32f5-926d-4927-9b68-d778af8eb4dd
+
+
+
 
 
 ## Inspiration
