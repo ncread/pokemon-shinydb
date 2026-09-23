@@ -15,19 +15,22 @@ async function signUp(email, password, username) {
         .maybeSingle();
     if (existing) throw new Error('Username already taken.');
 
-    const { data, error } = await db.auth.signUp({ email, password });
+    const { data, error } = await db.auth.signUp({ email, password, options: { data: { username } } });
     if (error) throw error;
 
     // The DB trigger auto-creates a profile row with the email prefix as username.
     // We upsert here to set the user's chosen username instead.
     // Requires "Confirm email" to be DISABLED in Supabase Auth → Settings
     // so the session is active immediately after signUp.
-    if (data.user) {
-        const { error: profileError } = await db
-            .from('profiles')
-            .upsert({ id: data.user.id, username });
-        if (profileError) throw profileError;
-    }
+    // if (data.user) {
+    //     if (data.session) {
+    //         await db.auth.setSession(data.session);
+    //     }
+    //     const { error: profileError } = await db
+    //         .from('profiles')
+    //         .upsert({ id: data.user.id, username });
+    //     if (profileError) throw profileError;
+    // }
 
     return data;
 }
