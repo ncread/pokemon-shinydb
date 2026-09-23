@@ -32,9 +32,12 @@
 
     <!-- PAGE HEADER -->
     <div class="page-header">
-        <div>
-            <h1 class="page-title">My Hunts</h1>
-            <p class="page-subtitle" id="hunt-count">&nbsp;</p>
+        <div style="display:flex; align-items:center; gap:0.75rem;">
+            <img id="random-sprite" src="" alt="" style="width:48px; height:48px; image-rendering:pixelated;">
+            <div>
+                <h1 class="page-title">My Hunts</h1>
+                <p class="page-subtitle" id="hunt-count">&nbsp;</p>
+            </div>
         </div>
         <button class="btn btn-primary" onclick="openModal()">+ New Hunt</button>
     </div>
@@ -165,6 +168,7 @@
         async function loadHunts() {
             try {
                 currentHunts = await getMyHunts(currentUser.id);
+                document.getElementById('random-sprite').src = randomShinySprite();
                 renderHunts();
             } catch (e) {
                 document.getElementById('hunts-container').innerHTML =

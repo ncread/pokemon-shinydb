@@ -114,6 +114,11 @@ function getShinySprite(pokemonId, name = null) {
     return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${name}.png`;
 }
 
+function randomShinySprite() {
+    const id = Math.floor(Math.random() * 649) + 1;
+    return getShinySprite(id)
+}
+
 // ── GAMES & METHODS ──────────────────────────────────────
 async function getGames() {
     const { data, error } = await db

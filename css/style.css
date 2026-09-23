@@ -45,6 +45,45 @@ body.light {
     --danger-dim:     rgba(216,64,80,0.12);
 }
 
+body {
+  position: relative;
+  margin: 0;
+}
+
+.header_container {
+    display: flex;
+    /* flex-direction: column; */
+    justify-content: space-between;
+    /* overflow: hidden; */
+}
+
+/* .header_overlay {
+    position: absolute;
+    inset: 0;
+    background: var(--header-overlay);
+    z-index: 0;
+    transition: background 0.35s ease;
+} */
+
+.logo {
+    transition: transform 0.3s ease;
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 14px 20px 0;
+}
+
+.logo:hover {
+    transform: scale(1.1);
+}
+
+.logo img {
+    height: 50px;
+    width: 75px;
+    border-radius: 10px;
+    display: block;
+}
+
 .theme-toggle {
     background: none;
     border: 1px solid var(--border-accent);
