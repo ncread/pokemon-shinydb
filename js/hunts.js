@@ -110,8 +110,7 @@ async function validatePokemon(nameOrId) {
 }
 
 function getShinySprite(pokemonId, name = null) {
-    if (pokemonId) return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${pokemonId}.png`;
-    return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/shiny/${name}.png`;
+    if (pokemonId) return `${BASE_PATH}/assets/sprites/shiny/${pokemonId}.png`;
 }
 
 function randomShinySprite() {
