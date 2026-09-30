@@ -129,6 +129,17 @@
             color: var(--text-muted);
             border-top: 1px solid var(--border);
         }
+
+        .gh-link {
+            display: block;
+            color: var(--gold);
+            text-align: center;
+            text-decoration: underline;
+        }
+
+        .gh-link:hover {
+            color: var(--gold-bright);
+        }
     </style>
 </head>
 
@@ -136,7 +147,7 @@
     <header class="header_container">
         <!-- <div class="header_overlay"></div> -->
             <div class="logo">
-                <a href="https://noahcread.com"><img src="/assets/nrlogo2.png" alt="home"></a>
+                <a href="https://noahcread.com" target="_blank"><img src="/assets/nrlogo2.png" alt="home"></a>
             </div>
         </div>
     </header>
@@ -200,7 +211,7 @@
                 <button class="btn btn-primary auth-submit" onclick="handleSignup()">Create Account</button>
             </div>
 
-            <!-- <div class="auth-foot">Powered by Supabase · Hosted on GitHub Pages</div> -->
+            <a class="gh-link" href="https://github.com/ncread/pokemon-shinydb" target="_blank"> Github repo with video tutorial</a>
         </div>
     </div>
 
