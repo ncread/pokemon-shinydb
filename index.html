@@ -135,6 +135,7 @@
             color: var(--gold);
             text-align: center;
             text-decoration: underline;
+            margin-top: 10px;
         }
 
         .gh-link:hover {
@@ -160,14 +161,16 @@
         <div class="auth-brand">
             <h1>✨ Pokémon Shiny Hunt Database</h1>
             <p>Track your shiny Pokémon hunts — Gen 2-5</p>
+            <a class="gh-link" href="https://github.com/ncread/pokemon-shinydb" target="_blank" >Video tutorial</a>
+            
         </div>
 
         <div class="auth-card">
-                <div style="text-align:right; padding:0.6rem 0.8rem 0;">
-                    <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
-                        <img id="theme-icon" src="" alt="theme" style="width:24px; height:24px; image-rendering:pixelated;">
-                    </button>
-                </div>
+            <div style="text-align:right; padding:0.6rem 0.8rem 0;">
+                <button class="theme-toggle" onclick="toggleTheme()" id="theme-btn">
+                    <img id="theme-icon" src="" alt="theme" style="width:24px; height:24px; image-rendering:pixelated;">
+                </button>
+            </div>
             <div class="auth-tabs">
                 <button class="auth-tab active" onclick="switchTab('login')">Log In</button>
                 <button class="auth-tab"        onclick="switchTab('signup')">Sign Up</button>
@@ -185,9 +188,15 @@
                     <label class="form-label">Password</label>
                     <input type="password" class="form-input" id="login-password"
                            placeholder="••••••••">
+                    <span class="form-hint" style="text-align:right; display:block; margin-right: 5px; margin-top: 10px">
+                        <a href="#" onclick="handleForgotPassword()" 
+                        style="color:var(--text-secondary); font-size:0.74rem;">Forgot password?</a>
+                    </span>
                 </div>
                 <button class="btn btn-primary auth-submit" onclick="handleLogin()">Log In</button>
             </div>
+
+
 
             <!-- SIGN UP -->
             <div class="auth-form" id="form-signup">
@@ -211,7 +220,6 @@
                 <button class="btn btn-primary auth-submit" onclick="handleSignup()">Create Account</button>
             </div>
 
-            <a class="gh-link" href="https://github.com/ncread/pokemon-shinydb" target="_blank"> Github repo with video tutorial</a>
         </div>
     </div>
 
@@ -278,6 +286,20 @@
                 window.location.href = '/pokemon-shinydb/dashboard/';
             } catch (e) {
                 showAlert('signup-alert', e.message);
+            }
+        }
+
+        async function handleForgotPassword() {
+            const email = document.getElementById('login-email').value.trim();
+            if (!email) return showAlert('login-alert', 'Enter your email above first.');
+            try {
+                const { error } = await db.auth.resetPasswordForEmail(email, {
+                    redirectTo: 'https://noahcread.com/pokemon-shinydb/reset-password/'
+                });
+                if (error) throw error;
+                showAlert('login-alert', 'Check your email for a reset link.', 'success');
+            } catch (e) {
+                showAlert('login-alert', e.message);
             }
         }
 
