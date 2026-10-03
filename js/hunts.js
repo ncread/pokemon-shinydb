@@ -54,10 +54,18 @@ function formatDate(iso) {
 }
 
 function daysElapsed(startIso, endIso = null) {
-    const start = new Date(startIso);
-    const end   = endIso ? new Date(endIso) : new Date();
-    const diff  = Math.floor((end - start) / (1000 * 60 * 60 * 24));
-    return diff;
+    const parse = iso => {
+        if (!iso) return new Date();
+        if (!iso.includes('T')) {
+            const [y, m, d] = iso.split('-').map(Number);
+            return new Date(y, m - 1, d);
+        }
+        const d = new Date(iso);
+        return new Date(d.getFullYear(), d.getMonth(), d.getDate());
+    };
+    const start = parse(startIso);
+    const end   = parse(endIso);
+    return Math.floor((end - start) / (1000 * 60 * 60 * 24)) + 1;
 }
 
 function formatDateShort(iso) {
@@ -263,10 +271,21 @@ async function updateEncounters(huntId, newCount) {
     if (error) throw error;
 }
 
+// async function markAsFound(huntId) {
+//     const { error } = await db
+//         .from('shiny_hunts')
+//         .update({ found: true, found_at: new Date().toISOString() })
+//         .eq('id', huntId);
+//     if (error) throw error;
+// }
 async function markAsFound(huntId) {
+    const now = new Date();
+    const localDate = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+        .toISOString().split('T')[0]; // gives "2026-10-02"
+    
     const { error } = await db
         .from('shiny_hunts')
-        .update({ found: true, found_at: new Date().toISOString() })
+        .update({ found: true, found_at: localDate })
         .eq('id', huntId);
     if (error) throw error;
 }
@@ -336,11 +355,11 @@ function renderHuntCard(hunt, isOwner = false) {
             </div>
         </div>` : '';
 
-    const days = daysElapsed(hunt.created_at, hunt.found ? hunt.found_at : null);
+    const days = daysElapsed(hunt.created_at, hunt.found && hunt.found_at ? hunt.found_at : null);
     const foundBar = (isFound && hunt.found_at)
         ? `<div class="hunt-datebar">
                <span>Started ${formatDateShort(hunt.created_at)}</span>
-               ${days >= -1 ? `<span class="hunt-datebar-days">${days + 2}d hunt</span>` : ''}
+               ${days > 0 ? `<span class="hunt-datebar-days">${days}d hunt</span>` : ''}
            </div>
            ${isOwner ? `<div class="found-bar">✨ Found on ${formatDate(hunt.found_at)}</div>` : ''}`
         : '';
@@ -374,15 +393,12 @@ function renderHuntCard(hunt, isOwner = false) {
             ${isFound && hunt.found_at ? `<span style="font-size:0.76rem; color:var(--gold);">✨ Found on ${formatDate(hunt.found_at)}</span>` : ''}
         </div>` : '';
 
-    // const dateBarHTML = days < 0 ? '' : hunt.found
-    //     ? `<div class="hunt-datebar">
-    //         <span>Found ${formatDateShort(hunt.found_at)}</span>
-    //         <span class="hunt-datebar-days">${days}d</span>
-    //     </div>`
-    //     : `<div class="hunt-datebar">
-    //         <span>Started ${formatDateShort(hunt.created_at)}</span>
-    //         <span class="hunt-datebar-days">${days}d elapsed</span>
-    //     </div>`;
+    const dateBarHTML = !isFound && !hunt.phase_of && days >= 0
+        ? `<div class="hunt-datebar">
+               <span>Started ${formatDateShort(hunt.created_at)}</span>
+               <span class="hunt-datebar-days">${days}d elapsed</span>
+           </div>`
+        : '';
 
     return `
         <div class="hunt-card ${isFound ? 'found' : ''} ${isOverdue ? 'overdue' : ''}"
@@ -425,7 +441,7 @@ function renderHuntCard(hunt, isOwner = false) {
 
             ${actionsHTML}
             ${foundBar}
-
+            ${dateBarHTML}
             ${footerHTML}
         </div>`;
 }
