@@ -190,7 +190,6 @@ async function getAllHunts() {
                 id, pokemon_name, pokemon_id, encounter_count
             )
         `)
-        .is('phase_of', null)
         .order('created_at', { ascending: false });
     if (error) throw error;
     const { data: profiles } = await db
@@ -363,10 +362,6 @@ function renderHuntCard(hunt, isOwner = false) {
             </div>
         </div>` : '';
 
-    // Found date bar
-    // const foundBar = (isFound && hunt.found_at)
-    //     ? `<div class="found-bar">✨ Found on ${formatDate(hunt.found_at)}</div>`
-    //     : '';
 
     // Community footer (username + date)
     const username = hunt.profile?.username || 'unknown';
@@ -379,15 +374,15 @@ function renderHuntCard(hunt, isOwner = false) {
             ${isFound && hunt.found_at ? `<span style="font-size:0.76rem; color:var(--gold);">✨ Found on ${formatDate(hunt.found_at)}</span>` : ''}
         </div>` : '';
 
-    const dateBarHTML = days < 0 ? '' : hunt.found
-        ? `<div class="hunt-datebar">
-            <span>Found ${formatDateShort(hunt.found_at)}</span>
-            <span class="hunt-datebar-days">${days}d</span>
-        </div>`
-        : `<div class="hunt-datebar">
-            <span>Started ${formatDateShort(hunt.created_at)}</span>
-            <span class="hunt-datebar-days">${days}d elapsed</span>
-        </div>`;
+    // const dateBarHTML = days < 0 ? '' : hunt.found
+    //     ? `<div class="hunt-datebar">
+    //         <span>Found ${formatDateShort(hunt.found_at)}</span>
+    //         <span class="hunt-datebar-days">${days}d</span>
+    //     </div>`
+    //     : `<div class="hunt-datebar">
+    //         <span>Started ${formatDateShort(hunt.created_at)}</span>
+    //         <span class="hunt-datebar-days">${days}d elapsed</span>
+    //     </div>`;
 
     return `
         <div class="hunt-card ${isFound ? 'found' : ''} ${isOverdue ? 'overdue' : ''}"
@@ -430,7 +425,7 @@ function renderHuntCard(hunt, isOwner = false) {
 
             ${actionsHTML}
             ${foundBar}
-            ${dateBarHTML}
+
             ${footerHTML}
         </div>`;
 }
